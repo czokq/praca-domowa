@@ -9,3 +9,4 @@
 	
 7 wprzciwnym razie 
 	wypisz nie zdałeś
+#

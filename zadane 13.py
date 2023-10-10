@@ -1,5 +1,5 @@
 import sys
-ocena = int(input("podaj swoją ocenę z klasy 8: "))
+ocena = int(input("podaj swoją ocenę z klasy 8: "))#
 wynik = int(input("podaj swój wynik z  testu: "))
 
 if wynik >= 90:

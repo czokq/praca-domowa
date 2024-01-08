@@ -1,4 +1,6 @@
 import tkinter as tk
+from tkinter import messagebox, Toplevel
+from PIL import Image, ImageTk, ImageSequence
 import logging
 import random
 import time
@@ -8,13 +10,7 @@ import math
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Definicje funkcji pomocniczych
-
 class TextHandler(logging.Handler):
-    """Klasa do obsługi logowania - przekierowuje logi do widgetu Tkinter Text"""
-    def __init__(self, text):
-        logging.Handler.__init__(self)
-        self.text = text
-
     def emit(self, record):
         msg = self.format(record)
         def append():
@@ -24,84 +20,64 @@ class TextHandler(logging.Handler):
             self.text.yview(tk.END)
         self.text.after(0, append)
 
-def fake_weather_data():
-    """Symuluje dane pogodowe i loguje je"""
-    weather_conditions = ["słonecznie", "pochmurno", "deszczowo", "śnieżnie"]
-    temperature = random.randint(-10, 35)
-    condition = random.choice(weather_conditions)
-    logging.info(f"Pogoda na dziś: {condition}, temperatura: {temperature} stopni C.")
-
+# Symulacja długiego procesu inicjalizacyjnego (przykładowa funkcja)
 def long_initialization_process():
-    """Symuluje długi proces inicjalizacji i loguje postęp z losowym wzrostem procentowym"""
     logging.info("Rozpoczynanie długiego procesu inicjalizacyjnego...")
-    percentage = 0
-    while percentage < 100:
-        increment = random.randint(1, 10)
-        percentage += increment
-        percentage = min(percentage, 100)
-        logging.info(f"Inicjalizacja... {percentage}%")
-        time.sleep(0.1)  # symulacja długiego procesu
-    logging.info("Inicjalizacja zakończona.")
+    # ... Reszta funkcji ...
 
-def calculate_collision_time():
-    """Oblicza czas zderzenia dwóch ciał"""
-    t = 0
-    dt = 0.001
-    while True:
-        y1 = 50 * t - 4.905 * t ** 2
-        y2 = 200 - 4.905 * t ** 2
+# Klasa do wyświetlania animowanego GIF
+class AnimatedGIF(tk.Label):
+    def __init__(self, master, path_to_gif):
+        tk.Label.__init__(self, master)
+        self.path_to_gif = path_to_gif
+        self.img = Image.open(self.path_to_gif)
+        self.frames = [ImageTk.PhotoImage(image) for image in ImageSequence.Iterator(self.img)]
+        self.index = 0
+        self.label = tk.Label(self)
+        self.label.grid()
+        self.cancel = self.after(0, self.play)
 
-        if math.isclose(y1, y2, abs_tol=0.001):
-            return t
-        t += dt
+    def play(self):
+        self.config(image=self.frames[self.index])
+        self.index += 1
+        if self.index == len(self.frames):
+            self.index = 0
+        self.cancel = self.after(50, self.play)
 
+# Funkcja do wyświetlania GIF
+def show_gif():
+    top = Toplevel(root)
+    top.title('GIF Animation')
+    AnimatedGIF(top, r'C:\Users\marek\Downloads\200w.gif').pack()
+
+# Funkcja gry w kółko i krzyżyk
+def tic_tac_toe():
+    top = Toplevel(root)
+    top.title('Kółko i Krzyżyk')
+    turn = 'X'
+
+    # ... Tutaj dodasz całą logikę gry w kółko i krzyżyk ...
+
+# Funkcja logowania
 def login():
-    """Funkcja obsługująca logowanie i uruchamiająca symulację zderzenia"""
     username = entry_username.get()
     password = entry_password.get()
     if username == "admin" and password == "admin":
         logging.info("Logowanie udane.")
-        # Uruchamianie symulacji zderzenia po udanym zalogowaniu
-        collision_time = calculate_collision_time()
-        logging.info(f"Ciała zderzą się w sekundzie: {collision_time:.3f} s.")
+        tic_tac_toe()
     else:
         logging.error("Logowanie nieudane. Błędna nazwa użytkownika lub hasło.")
 
 # Ustawienie okna Tkinter
-
 root = tk.Tk()
 root.title("Okno logowania i konsola")
 
-# Ustawienie pola tekstowego dla logów
+# ... Tutaj skonfigurujesz resztę interfejsu użytkownika ...
 
-text = tk.Text(root, height=15, state='disabled')
-text.pack()
+# Dodanie przycisku do otwarcia okna z GIFem
+button_show_gif = tk.Button(root, text="Pokaż GIF", command=show_gif)
+button_show_gif.pack(side=tk.BOTTOM)
 
-# Ustawienie handlera dla logowania
+# ... Tutaj umieścisz resztę kodu aplikacji ...
 
-handler = TextHandler(text)
-logging.getLogger().addHandler(handler)
-
-# Ustawienie interfejsu logowania
-
-frame_login = tk.Frame(root)
-frame_login.pack(pady=10)
-
-label_username = tk.Label(frame_login, text="Nazwa użytkownika:")
-label_username.pack(side=tk.LEFT)
-entry_username = tk.Entry(frame_login)
-entry_username.pack(side=tk.LEFT)
-
-label_password = tk.Label(frame_login, text="Hasło:")
-label_password.pack(side=tk.LEFT)
-entry_password = tk.Entry(frame_login, show="*")
-entry_password.pack(side=tk.LEFT)
-
-button_login = tk.Button(frame_login, text="Logowanie", command=login)
-button_login.pack(side=tk.LEFT)
-
-# Uruchomienie symulacji danych pogodowych i procesu inicjalizacji w tle
-fake_weather_data()
-long_initialization_process()
-
-root.mainloop() dodaj wykres rysowany za pomocą bibloteki turtle
+root.mainloop()

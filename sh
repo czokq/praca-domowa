@@ -1,11 +1,8 @@
 import tkinter as tk
-from tkinter import messagebox, Toplevel, scrolledtext
-from PIL import Image, ImageTk, ImageSequence
+from tkinter import messagebox, scrolledtext
 import logging
 import random
-import time
 import threading
-import math
 
 # Ustawienie loggera
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -28,23 +25,49 @@ class TextHandler(logging.Handler):
 # Symulacja długiego procesu inicjalizacyjnego
 def long_initialization_process():
     for i in range(1, 101):
-        time.sleep(0.05)  # Symulacja długiego procesu
+        threading.Event().wait(0.05)  # Symulacja długiego procesu
         logging.info(f"Inicjalizacja... {i}%")
     logging.info("Inicjalizacja zakończona.")
 
-# Klasa do wyświetlania animowanego GIF
-class AnimatedGIF(tk.Label):
-    # ... [Kod klasy AnimatedGIF] ...
-
-# Funkcja do wyświetlania GIF
-def show_gif():
-    top = Toplevel(root)
-    top.title('GIF Animation')
-    AnimatedGIF(top, r'C:\Users\marek\Downloads\200w.gif').pack()
-
 # Funkcja gry w kółko i krzyżyk
 def tic_tac_toe():
-    # ... [Kod gry w kółko i krzyżyk] ...
+    top = tk.Toplevel(root)
+    top.title('Kółko i Krzyżyk')
+    turn = 'X'  # X zaczyna grę
+    buttons = [[None, None, None], [None, None, None], [None, None, None]]
+
+    def check_for_win():
+        # ... [Logika sprawdzania wygranej] ...
+        return ""
+
+    def ai_move():
+        empty_cells = [(i, j) for i in range(3) for j in range(3) if buttons[i][j]['text'] == ""]
+        if empty_cells:
+            i, j = random.choice(empty_cells)
+            buttons[i][j]['text'] = 'O'
+            if check_for_win() == 'O':
+                messagebox.showinfo("Wygrana", "O wygrywa!")
+                top.destroy()
+            return True
+        return False
+
+    def on_click(i, j):
+        nonlocal turn
+        if buttons[i][j]['text'] == "" and turn == 'X':
+            buttons[i][j]['text'] = 'X'
+            if check_for_win() == 'X':
+                messagebox.showinfo("Wygrana", "X wygrywa!")
+                top.destroy()
+            elif not ai_move():
+                if not any(button['text'] == "" for row in buttons for button in row):
+                    messagebox.showinfo("Remis", "Gra zakończona remisem!")
+                    top.destroy()
+
+    for i in range(3):
+        for j in range(3):
+            buttons[i][j] = tk.Button(top, font=('normal', 40), width=5, height=2,
+                                      command=lambda i=i, j=j: on_click(i, j))
+            buttons[i][j].grid(row=i, column=j)
 
 # Funkcja logowania
 def login():
@@ -85,9 +108,5 @@ entry_password.pack(side=tk.LEFT)
 
 button_login = tk.Button(frame_login, text="Logowanie", command=login)
 button_login.pack(side=tk.LEFT)
-
-# Dodanie przycisku do otwarcia okna z GIFem
-button_show_gif = tk.Button(frame_login, text="Pokaż GIF", command=show_gif)
-button_show_gif.pack(side=tk.LEFT)
 
 root.mainloop()

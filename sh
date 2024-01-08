@@ -1,34 +1,29 @@
 import tkinter as tk
-from tkinter import Toplevel
+from tkinter import messagebox, scrolledtext
 import turtle
+import logging
 
-# Funkcja gry w kółko i krzyżyk
-def tic_tac_toe():
-    # ... [Kod gry w kółko i krzyżyk] ...
+# Ustawienie loggera
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Funkcja logowania
-def login():
-    # ... [Kod funkcji logowania] ...
+# Definicje funkcji pomocniczych
+class TextHandler(logging.Handler):
+    # ... [Kod klasy TextHandler] ...
 
 # Funkcja rysująca parabolę za pomocą turtle
 def draw_parabola_turtle():
-    # Ustawienia dla okna turtle
-    top = Toplevel(root)
-    top.title('Wykres Paraboli z użyciem Turtle')
-    canvas = tk.Canvas(master=top, width=500, height=400)
-    canvas.pack()
-
+    # Ustawienia dla turtle
     screen = turtle.TurtleScreen(canvas)
     t = turtle.RawTurtle(screen)
 
     t.speed(0)  # Ustawienie najszybszej prędkości rysowania
-    screen.setworldcoordinates(-10, -10, 10, 100)  # Zakres współrzędnych
+    screen.setworldcoordinates(-25, -10, 25, 100)  # Zakres współrzędnych
 
     # Rysowanie osi
     t.up()
-    t.goto(-10, 0)
+    t.goto(-25, 0)
     t.down()
-    t.goto(10, 0)
+    t.goto(25, 0)
     t.up()
     t.goto(0, -10)
     t.down()
@@ -37,25 +32,55 @@ def draw_parabola_turtle():
 
     # Rysowanie paraboli y = x^2
     t.color("blue")
+    t.goto(-10, 0)
+    t.down()
     for x in range(-10, 11):
         y = x ** 2
-        if x == -10:
-            t.up()
-            t.goto(x, y)
-            t.down()
-        else:
-            t.goto(x, y)
+        t.goto(x, y)
 
     t.hideturtle()  # Ukrycie żółwia
+
+# Funkcja logowania
+def login():
+    username = entry_username.get()
+    password = entry_password.get()
+    if username == "admin" and password == "admin":
+        logging.info("Logowanie udane.")
+        draw_parabola_turtle()
+    else:
+        logging.error("Logowanie nieudane. Błędna nazwa użytkownika lub hasło.")
 
 # Ustawienie okna Tkinter
 root = tk.Tk()
 root.title("Okno logowania i konsola")
 
-# ... [Kod ustawienia interfejsu użytkownika] ...
+# Ustawienie pola tekstowego dla logów
+text = scrolledtext.ScrolledText(root, state='disabled', height=10)
+text.pack()
 
-# Dodanie przycisku do rysowania paraboli turtle
-button_draw_parabola = tk.Button(root, text="Rysuj Parabolę Turtle", command=draw_parabola_turtle)
-button_draw_parabola.pack(side=tk.BOTTOM)
+# Ustawienie handlera dla logowania
+handler = TextHandler(text)
+logging.getLogger().addHandler(handler)
+
+# Ustawienie interfejsu logowania
+frame_login = tk.Frame(root)
+frame_login.pack(pady=10)
+
+label_username = tk.Label(frame_login, text="Nazwa użytkownika:")
+label_username.pack(side=tk.LEFT)
+entry_username = tk.Entry(frame_login)
+entry_username.pack(side=tk.LEFT)
+
+label_password = tk.Label(frame_login, text="Hasło:")
+label_password.pack(side=tk.LEFT)
+entry_password = tk.Entry(frame_login, show="*")
+entry_password.pack(side=tk.LEFT)
+
+button_login = tk.Button(frame_login, text="Logowanie", command=login)
+button_login.pack(side=tk.LEFT)
+
+# Ustawienie obszaru rysowania Turtle w Tkinter
+canvas = turtle.ScrolledCanvas(root)
+canvas.pack(fill=tk.BOTH, expand=True)
 
 root.mainloop()

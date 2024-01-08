@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, Toplevel
+from tkinter import messagebox, Toplevel, scrolledtext
 from PIL import Image, ImageTk, ImageSequence
 import logging
 import random
@@ -11,73 +11,53 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 # Definicje funkcji pomocniczych
 class TextHandler(logging.Handler):
+    def __init__(self, text_widget):
+        logging.Handler.__init__(self)
+        self.text_widget = text_widget
+
     def emit(self, record):
         msg = self.format(record)
         def append():
-            self.text.configure(state='normal')
-            self.text.insert(tk.END, msg + '\n')
-            self.text.configure(state='disabled')
-            self.text.yview(tk.END)
-        self.text.after(0, append)
+            self.text_widget.configure(state='normal')
+            self.text_widget.insert(tk.END, msg + '\n')
+            self.text_widget.configure(state='disabled')
+            self.text_widget.yview(tk.END)
+        self.text_widget.after(0, append)
 
-# Symulacja długiego procesu inicjalizacyjnego (przykładowa funkcja)
-def long_initialization_process():
+def long_initialization_process(text_widget):
     logging.info("Rozpoczynanie długiego procesu inicjalizacyjnego...")
-    # ... Reszta funkcji ...
+    for i in range(1, 101):
+        time.sleep(0.05)  # Symulacja długiego procesu
+        logging.info(f"Inicjalizacja... {i}%")
+    logging.info("Inicjalizacja zakończona.")
 
 # Klasa do wyświetlania animowanego GIF
 class AnimatedGIF(tk.Label):
-    def __init__(self, master, path_to_gif):
-        tk.Label.__init__(self, master)
-        self.path_to_gif = path_to_gif
-        self.img = Image.open(self.path_to_gif)
-        self.frames = [ImageTk.PhotoImage(image) for image in ImageSequence.Iterator(self.img)]
-        self.index = 0
-        self.label = tk.Label(self)
-        self.label.grid()
-        self.cancel = self.after(0, self.play)
-
-    def play(self):
-        self.config(image=self.frames[self.index])
-        self.index += 1
-        if self.index == len(self.frames):
-            self.index = 0
-        self.cancel = self.after(50, self.play)
+    # ... [Klasa AnimatedGIF] ...
 
 # Funkcja do wyświetlania GIF
 def show_gif():
-    top = Toplevel(root)
-    top.title('GIF Animation')
-    AnimatedGIF(top, r'C:\Users\marek\Downloads\200w.gif').pack()
-
-# Funkcja gry w kółko i krzyżyk
-def tic_tac_toe():
-    top = Toplevel(root)
-    top.title('Kółko i Krzyżyk')
-    turn = 'X'
-
-    # ... Tutaj dodasz całą logikę gry w kółko i krzyżyk ...
-
-# Funkcja logowania
-def login():
-    username = entry_username.get()
-    password = entry_password.get()
-    if username == "admin" and password == "admin":
-        logging.info("Logowanie udane.")
-        tic_tac_toe()
-    else:
-        logging.error("Logowanie nieudane. Błędna nazwa użytkownika lub hasło.")
+    # ... [Funkcja show_gif] ...
 
 # Ustawienie okna Tkinter
 root = tk.Tk()
 root.title("Okno logowania i konsola")
 
-# ... Tutaj skonfigurujesz resztę interfejsu użytkownika ...
+# Ustawienie pola tekstowego dla logów
+text = scrolledtext.ScrolledText(root, state='disabled', height=10)
+text.pack()
 
-# Dodanie przycisku do otwarcia okna z GIFem
-button_show_gif = tk.Button(root, text="Pokaż GIF", command=show_gif)
-button_show_gif.pack(side=tk.BOTTOM)
+# Ustawienie handlera dla logowania
+handler = TextHandler(text)
+logging.getLogger().addHandler(handler)
 
-# ... Tutaj umieścisz resztę kodu aplikacji ...
+# ... [Kod interfejsu użytkownika] ...
+
+# ... [Kod gry w kółko i krzyżyk] ...
+
+# ... [Kod funkcji logowania] ...
+
+# Uruchomienie symulacji w tle
+threading.Thread(target=long_initialization_process, args=(text,), daemon=True).start()
 
 root.mainloop()
